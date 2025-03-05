@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import hu.bme.aut.android.teacollector.feature.cars.CarsScreen
 import hu.bme.aut.android.teacollector.ui.theme.TEACollectorTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,12 +20,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TEACollectorTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Abi",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                CarsScreen()
             }
         }
     }
