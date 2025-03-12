@@ -36,6 +36,7 @@ import androidx.compose.ui.semantics.Role.Companion.Image
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import hu.bme.aut.android.teacollector.R
 import hu.bme.aut.android.teacollector.data.car.model.CarItem
 
@@ -60,11 +61,19 @@ fun CarItemCard(
             modifier = Modifier.padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                modifier = Modifier.size(80.dp),
-                painter = painterResource(R.drawable.test_tea), // Placeholder image
-                contentDescription = "Car Image"
-            )
+            if(carItem.imageUri != null){
+                AsyncImage(
+                    model = carItem.imageUri, // Load from URI
+                    contentDescription = "Car Image",
+                    modifier = Modifier.size(80.dp)
+                )
+            }else {
+                Image(
+                    modifier = Modifier.size(80.dp),
+                    painter = painterResource(R.drawable.placeholder), // Placeholder image
+                    contentDescription = "Car Image"
+                )
+            }
 
             Column(
                 modifier = Modifier
@@ -73,7 +82,7 @@ fun CarItemCard(
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(text = carItem.name, fontSize = 20.sp, maxLines = 1)
-                Text(text = carItem.desciption, maxLines = 2)
+                Text(text = carItem.description, maxLines = 2)
             }
 
             Column(
@@ -118,7 +127,7 @@ fun PreviewCarItemCard() {
     CarItemCard(
         carItem = CarItem(
             name = "TEA-123",
-            desciption = "Szép rendszám",
+            description = "Szép rendszám",
             long = 10.1,
             lat = 10.2
         ),

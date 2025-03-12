@@ -22,12 +22,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import hu.bme.aut.android.teacollector.R
+import hu.bme.aut.android.teacollector.data.car.model.CarItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CarListTopBar(
     onMenuClick: () -> Unit,
-    onSearchQueryChange: (String) -> Unit
+    onSearchQueryChange: (String) -> Unit,
+    cars: List<CarItem>,
+    onSearchResults: (List<CarItem>) -> Unit
 ){
     var searchQuery by remember {mutableStateOf("")}
 
@@ -40,8 +43,8 @@ fun CarListTopBar(
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { newQuery ->
-                        searchQuery = newQuery
                         onSearchQueryChange(newQuery)
+                        //onSearchResults(filterCars(newQuery, cars))
                     },
                     placeholder = {
                         Text("Search...")
@@ -67,8 +70,27 @@ fun CarListTopBar(
     )
 }
 
-@Preview
+/*fun filterCars(query: String, cars: List<CarItem>): List<CarItem> {
+    val normalizedQuery = query.trim().uppercase()
+
+    return cars.filter { car ->
+        //TEA- 3 digits
+        if (normalizedQuery.startsWith("TEA-") && normalizedQuery.length == 7) {
+            val carName = car.name.toUpperCase()
+            carName.startsWith(normalizedQuery)
+        }
+        // 3 digits
+        else if (normalizedQuery.length == 3 && normalizedQuery.all { it.isDigit() }) {
+            val carName = car.name.takeLast(3)
+            carName == normalizedQuery
+        } else {
+            false
+        }
+    }
+}*/
+
+/*@Preview
 @Composable
 fun PreviewCarListTopBar() {
     CarListTopBar(onMenuClick = {}, onSearchQueryChange = {})
-}
+}*/
