@@ -19,7 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-//import androidx.compose.material3.Card
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
+import hu.bme.aut.android.teacollector.ui.theme.TEAGreen
 
 @Composable
 fun CarItemDialog(
@@ -48,7 +49,7 @@ fun CarItemDialog(
 
     val pickImageLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()){ uri ->
-            uri?.let{
+            uri?.let {
                 context.contentResolver.takePersistableUriPermission(
                     it,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
@@ -56,6 +57,7 @@ fun CarItemDialog(
                 imageUri = it
             }
         }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -64,7 +66,7 @@ fun CarItemDialog(
     ){
         Box(
             modifier = Modifier
-                .size(150.dp)
+                .size(400.dp)
                 .background(Color.LightGray, shape = RoundedCornerShape(8.dp)),
             contentAlignment = Alignment.Center
         ){
@@ -75,62 +77,79 @@ fun CarItemDialog(
                     modifier = Modifier.fillMaxSize()
                 )
             }else{
-                Button(onClick = {
-                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply{
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = "image/*"
-                        putExtra(DocumentsContract.EXTRA_INITIAL_URI, Uri.parse("content://media/external/images/tea"))
-                    }
-                    pickImageLauncher.launch(arrayOf("image/*"))
-                }){
-                    Text("Kép feltöltése")
+                Row(
+                    modifier = Modifier.fillMaxWidth(),  // Ensure Row fills available width
+                    horizontalArrangement = Arrangement.spacedBy(16.dp), // Adds space between buttons
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                                addCategory(Intent.CATEGORY_OPENABLE)
+                                type = "image/*"
+                                putExtra(DocumentsContract.EXTRA_INITIAL_URI, Uri.parse("content://media/external/images/tea"))
+                            }
+                            pickImageLauncher.launch(arrayOf("image/*"))
+                            },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = TEAGreen
+                        ))
+                        {
+                            Text("Kép feltöltése")
+                        }
+
+                        Button(
+                            onClick = { /* TODO Handle photo capture */ },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = TEAGreen
+                            )) {
+                            Text("Fotózás")
+                        }
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-            //Car Name Field
+        // Car Name Field
         OutlinedTextField(
-                value = name,
-                onValueChange = { input ->
-                    if (input.startsWith("TEA-")) {
-                        // Get the numeric part after "TEA-", restrict it to 3 digits
-                        val numericPart = input.substring(4).filter { it.isDigit() }.take(3)
-                        // Update the name with the proper format "TEA-XXX"
-                        name = "TEA-$numericPart"
-                    } else {
-                        // If the input doesn't start with "TEA-", we reset it to "TEA-" and allow only digits
-                        name = "TEA-" + input.filter { it.isDigit() }.take(3)
-                    }
-                },
-                label = { Text("Autó neve") },
-                modifier = Modifier.fillMaxWidth(),
-                    isError = name.length != 8 || !name.startsWith("TEA-")
+            value = name,
+            onValueChange = { input ->
+                if (input.startsWith("TEA-")) {
+                    //Get the numeric part after "TEA-", restrict it to 3 digits
+                    val numericPart = input.substring(4).filter { it.isDigit() }.take(3)
+                    name = "TEA-$numericPart"
+                } else {
+                    name = "TEA-" + input.filter { it.isDigit() }.take(3)
+                }
+            },
+            label = { Text("Autó neve") },
+            modifier = Modifier.fillMaxWidth(),
+            isError = name.length != 8 || !name.startsWith("TEA-")
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-            //Car Description Field
+        // Car Description Field
         OutlinedTextField(
-                value = description,
-                onValueChange = { description = it },
-                label = { Text("Leírás") },
-                modifier = Modifier.fillMaxWidth()
+            value = description,
+            onValueChange = { description = it },
+            label = { Text("Leírás") },
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-            //Buttons (Save&Cancel)
+        // Buttons (Save & Cancel)
         Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             Button(onClick = { onDismiss() }) {
-                    Text("Mégse") // Cancel Button
+                Text("Mégse") // Cancel Button
             }
             Button(onClick = { onSave(name, description, imageUri) }) {
-                    Text("Mentés") // Save Button
+                Text("Mentés") // Save Button
             }
         }
     }

@@ -23,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import hu.bme.aut.android.teacollector.R
 import hu.bme.aut.android.teacollector.data.car.model.CarItem
+import hu.bme.aut.android.teacollector.feature.cars.filterCars
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,9 +43,10 @@ fun CarListTopBar(
             ){
                 OutlinedTextField(
                     value = searchQuery,
-                    onValueChange = { newQuery ->
-                        onSearchQueryChange(newQuery)
-                        //onSearchResults(filterCars(newQuery, cars))
+                    onValueChange = {query ->
+                        searchQuery = query
+                        onSearchQueryChange(query)
+                        onSearchResults(filterCars(query, cars))
                     },
                     placeholder = {
                         Text("Search...")
@@ -69,25 +71,6 @@ fun CarListTopBar(
         }
     )
 }
-
-/*fun filterCars(query: String, cars: List<CarItem>): List<CarItem> {
-    val normalizedQuery = query.trim().uppercase()
-
-    return cars.filter { car ->
-        //TEA- 3 digits
-        if (normalizedQuery.startsWith("TEA-") && normalizedQuery.length == 7) {
-            val carName = car.name.toUpperCase()
-            carName.startsWith(normalizedQuery)
-        }
-        // 3 digits
-        else if (normalizedQuery.length == 3 && normalizedQuery.all { it.isDigit() }) {
-            val carName = car.name.takeLast(3)
-            carName == normalizedQuery
-        } else {
-            false
-        }
-    }
-}*/
 
 /*@Preview
 @Composable

@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,17 +44,16 @@ import hu.bme.aut.android.teacollector.data.car.model.CarItem
 @Composable
 fun CarItemCard(
     carItem: CarItem,
-    onDeleteIconClick: () -> Unit,
-    onEditIconClick: (CarItem) -> Unit
+    onCardClick: (String) -> Unit //pass carName
 ) {
-    //var isChecked by remember { mutableStateOf(carItem.isCollected) }
-    var isInteractionPanelExpanded by remember { mutableStateOf(false) }
+    var isChecked by rememberSaveable { mutableStateOf(carItem.isCollected) }
+
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable { isInteractionPanelExpanded = !isInteractionPanelExpanded },
+            .clickable { onCardClick(carItem.name) },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.elevatedCardElevation()
     ) {
@@ -63,7 +63,7 @@ fun CarItemCard(
         ) {
             if(carItem.imageUri != null){
                 AsyncImage(
-                    model = carItem.imageUri, // Load from URI
+                    model = carItem.imageUri.takeIf {!it.isNullOrEmpty()}, // Fallback to empty string to avoid null issues
                     contentDescription = "Car Image",
                     modifier = Modifier.size(80.dp)
                 )
@@ -84,44 +84,12 @@ fun CarItemCard(
                 Text(text = carItem.name, fontSize = 20.sp, maxLines = 1)
                 Text(text = carItem.description, maxLines = 2)
             }
-
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.weight(1f)
-            ) {}
-
-            if (isInteractionPanelExpanded) {
-                Column {
-                    IconButton(
-                        modifier = Modifier.background(MaterialTheme.colorScheme.inversePrimary),
-                        onClick = {
-                            onDeleteIconClick()
-                            isInteractionPanelExpanded = false
-                        }
-                    ) {
-                        Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete")
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    IconButton(
-                        modifier = Modifier.background(MaterialTheme.colorScheme.inversePrimary),
-                        onClick = {
-                            onEditIconClick(carItem)
-                            isInteractionPanelExpanded = false
-                        }
-                    ) {
-                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit")
-                    }
-                }
-            }
         }
     }
 }
 
 
-@Preview
+/*@Preview
 @Composable
 fun PreviewCarItemCard() {
     CarItemCard(
@@ -130,8 +98,6 @@ fun PreviewCarItemCard() {
             description = "Szép rendszám",
             long = 10.1,
             lat = 10.2
-        ),
-        onDeleteIconClick = {},
-        onEditIconClick = {}
+        )
     )
-}
+}*/

@@ -9,6 +9,7 @@ import hu.bme.aut.android.teacollector.teaCollectorApplication
 import hu.bme.aut.android.teacollector.data.car.ICarRepository
 import hu.bme.aut.android.teacollector.data.car.MemoryCarRepository
 import hu.bme.aut.android.teacollector.data.car.model.CarItem
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -18,7 +19,8 @@ import kotlinx.coroutines.launch
 class CarsViewModel(
     private val repository: ICarRepository
 ) : ViewModel() {
-    private val _list = MutableStateFlow<List<CarItem>>(listOf())
+
+    private val _list = MutableStateFlow<List<CarItem>>(emptyList())
     val carItemList = _list.asStateFlow()
 
     init {
@@ -27,8 +29,8 @@ class CarsViewModel(
 
     fun getAllItems() {
         viewModelScope.launch {
-            repository.getAllItems().collectLatest {
-                _list.tryEmit(it)
+            repository.getAllItems().collect {
+                _list.value = it
             }
         }
     }
@@ -43,15 +45,21 @@ class CarsViewModel(
         }
     }
 
-    fun update(item: CarItem) {
+    fun update(carItem: CarItem) {
         viewModelScope.launch {
             try {
-                repository.update(carItem = item)
+                repository.update(carItem)
+                // Trigger recomposition
+                _list.value = _list.value.map {
+                    if (it.name == carItem.name) carItem else it
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
+
+
 
     fun delete(item: CarItem) {
         viewModelScope.launch {
@@ -61,6 +69,10 @@ class CarsViewModel(
                 e.printStackTrace()
             }
         }
+    }
+
+    fun getCarByName(carName: String): CarItem? {
+        return carItemList.value.find { it.name == carName }
     }
 
     companion object {

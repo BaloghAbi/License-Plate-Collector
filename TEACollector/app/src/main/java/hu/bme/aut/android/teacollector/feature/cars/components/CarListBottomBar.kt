@@ -13,35 +13,40 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import hu.bme.aut.android.teacollector.ui.theme.TEAGreen
 
 @Composable
-fun CarListBottomBar(onMapClick: () -> Unit) {
+fun CarListBottomBar(
+    onMapClick: () -> Unit,
+    onProfileClick: () -> Unit,
+    onHomeClick: () -> Unit,
+    onSettingsClick: () -> Unit) {
     NavigationBar(
         modifier = Modifier.fillMaxWidth()
     ) {
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+            icon = { Icon(Icons.Default.Home, contentDescription = "Home", tint = TEAGreen) },
             label = { Text("Home") },
             selected = false,
-            onClick = { /* TODO: Handle click */ }
+            onClick = onHomeClick
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Default.LocationOn, contentDescription = "Map") },
+            icon = { Icon(Icons.Default.LocationOn, contentDescription = "Map", tint = TEAGreen) },
             label = { Text("Map") },
             selected = false,
             onClick = onMapClick
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
+            icon = { Icon(Icons.Default.Person, contentDescription = "Profile", tint = TEAGreen) },
             label = { Text("Profile") },
             selected = false,
-            onClick = { /* TODO: Handle click */ }
+            onClick = onProfileClick
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+            icon = { Icon(Icons.Default.Settings, contentDescription = "Settings", tint = TEAGreen) },
             label = { Text("Settings") },
             selected = false,
-            onClick = { /* TODO: Handle click */ }
+            onClick = onSettingsClick
         )
     }
 }
@@ -49,5 +54,10 @@ fun CarListBottomBar(onMapClick: () -> Unit) {
 @Preview
 @Composable
 fun PreviewCarListBottomBar() {
-    CarListBottomBar(onMapClick = {})
+    CarListBottomBar(
+        onMapClick = {},
+        onProfileClick = {},
+        onHomeClick = {},
+        onSettingsClick = {}
+    )
 }

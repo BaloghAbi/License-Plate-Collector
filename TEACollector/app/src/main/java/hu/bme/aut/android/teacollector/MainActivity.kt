@@ -11,7 +11,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
 import hu.bme.aut.android.teacollector.feature.cars.CarListScreen
+import hu.bme.aut.android.teacollector.navigation.NavGraph
 import hu.bme.aut.android.teacollector.ui.theme.TEACollectorTheme
 
 class MainActivity : ComponentActivity() {
@@ -20,7 +22,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TEACollectorTheme {
-                CarListScreen()
+                val navController = rememberNavController()
+                NavGraph(navController = navController)
             }
         }
     }

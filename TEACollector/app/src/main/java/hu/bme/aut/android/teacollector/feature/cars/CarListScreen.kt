@@ -14,23 +14,34 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import hu.bme.aut.android.teacollector.data.car.model.CarItem
 import hu.bme.aut.android.teacollector.feature.cars.components.CarItemCard
 import hu.bme.aut.android.teacollector.feature.cars.components.CarItemDialog
 import hu.bme.aut.android.teacollector.feature.cars.components.CarListBottomBar
 import hu.bme.aut.android.teacollector.feature.cars.components.CarListTopBar
+import hu.bme.aut.android.teacollector.navigation.Screen
+import hu.bme.aut.android.teacollector.ui.theme.TEAGreen
+
 //import hu.bme.aut.android.teacollector.feature.cars.components.filterCars
 
 
 @Composable
-fun CarListScreen(viewModel: CarsViewModel = viewModel(factory = CarsViewModel.Factory)) {
+fun CarListScreen(
+    viewModel: CarsViewModel = viewModel(factory = CarsViewModel.Factory),
+    onCarItemClick: (String) -> Unit, //pass car id to navigate
+    navController: NavHostController
+    ) {
 
     val list = viewModel.carItemList.collectAsState().value
+
+
 
     var filteredCars by remember { mutableStateOf(list) }
 
@@ -41,27 +52,29 @@ fun CarListScreen(viewModel: CarsViewModel = viewModel(factory = CarsViewModel.F
         filteredCars = searchResults
     }
 
-    var searchQuery by remember { mutableStateOf("") }
-
     Scaffold(
         topBar = {
             CarListTopBar(
-                onMenuClick = {/*TODO*/ },
+                onMenuClick = {/* TODO */ },
                 onSearchQueryChange = { query ->
-                    searchQuery = query
-                    //onSearchResults(filterCars(query, list))
+                    filteredCars = list.filter{
+                        it.name.contains(query, ignoreCase = true)
+                    }
                 },
                 cars = list,
-                onSearchResults = onSearchResults
+                onSearchResults = { results ->
+                    filteredCars = results
+                }
             )
         },
         floatingActionButton = {
             LargeFloatingActionButton(
-                containerColor = MaterialTheme.colorScheme.primary,
+                containerColor = TEAGreen,
                 onClick = {
                     carToEdit = null
                     isDialogOpen = true
-                }) {
+                }
+                ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Add new item"
@@ -70,21 +83,22 @@ fun CarListScreen(viewModel: CarsViewModel = viewModel(factory = CarsViewModel.F
         },
         bottomBar = {
             CarListBottomBar(
-                onMapClick = {/*TODO*/}
+                onMapClick = { navController.navigate(Screen.MainMap.route) },
+                onProfileClick = { navController.navigate(Screen.Profile.route) },
+                onHomeClick = { navController.navigate(Screen.CarList.route) },
+                onSettingsClick = { navController.navigate(Screen.Settings.route) }
             )
         }
     ) { innerPadding ->
 
         LazyColumn(modifier = Modifier.padding(innerPadding)) {
-            items(list, key = {item -> item.name}) { carItem ->
+            items(filteredCars, key = {item -> item.name}) { carItem ->
                 CarItemCard(
                     carItem = carItem,
-                    onDeleteIconClick = {
-                        viewModel.delete(carItem)
-                    },
-                    onEditIconClick = {
-                        carToEdit = it
-                        isDialogOpen = true
+                    onCardClick = { carName ->
+                        carName?.let {
+                            onCarItemClick(it)
+                        }
                     }
                 )
             }
@@ -97,22 +111,12 @@ fun CarListScreen(viewModel: CarsViewModel = viewModel(factory = CarsViewModel.F
                 onDismiss = { isDialogOpen = false },
                 onSave = { name, description, imageUri ->
                     // TODO: Handle the saved data (e.g., add to list)
-                    if(carToEdit == null){
-                        viewModel.insert(
-                            CarItem(
-                                name = name,
-                                description = description,
-                                isCollected = false,
-                                lat = 0.0,
-                                long = 0.0,
-                                imageUri = imageUri?.toString()
-                            )
-                        )
-                    }else{
+                    val toUpdateCar = list.find { it.name == name }
+                    if(toUpdateCar != null){
                         viewModel.update(
-                            carToEdit!!.copy(
-                                name = name,
-                                description = description
+                            toUpdateCar.copy(
+                                description = description,
+                                imageUri = imageUri?.toString()
                             )
                         )
                     }
@@ -123,8 +127,20 @@ fun CarListScreen(viewModel: CarsViewModel = viewModel(factory = CarsViewModel.F
     }
 }
 
-@Preview
-@Composable
-fun MainScreenPreview() {
-    CarListScreen()
+fun filterCars(query: String, cars: List<CarItem>): List<CarItem> {
+    val normalizedQuery = query.trim().uppercase()
+
+    return cars.filter { car ->
+        when {
+            // Matches "TEA-123"
+            normalizedQuery.startsWith("TEA-") && normalizedQuery.length == 7 ->
+                car.name.uppercase().startsWith(normalizedQuery)
+
+            // Matches last 3 digits like "123"
+            normalizedQuery.length == 3 && normalizedQuery.all { it.isDigit() } ->
+                car.name.takeLast(3) == normalizedQuery
+
+            else -> false
+        }
+    }
 }
