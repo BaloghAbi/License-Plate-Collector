@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "557000819094",
+    "project_id": "teacollector-75bd5",
+    "storage_bucket": "teacollector-75bd5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:557000819094:android:33e59a080f530980a65db7",
+        "android_client_info": {
+          "package_name": "hu.bme.aut.android.teacollector"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGLqBFlqkynAmwO-6zk8t3uQxVUIvYoCo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

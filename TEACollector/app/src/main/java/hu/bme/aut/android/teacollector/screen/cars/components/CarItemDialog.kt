@@ -1,8 +1,10 @@
-package hu.bme.aut.android.teacollector.feature.cars.components
+package hu.bme.aut.android.teacollector.screen.cars.components
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Environment
 import android.provider.DocumentsContract
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -23,6 +25,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,8 +36,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import coil.compose.rememberAsyncImagePainter
 import hu.bme.aut.android.teacollector.ui.theme.TEAGreen
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun CarItemDialog(
@@ -44,7 +53,6 @@ fun CarItemDialog(
     var name by remember { mutableStateOf("TEA-") }
     var description by remember { mutableStateOf("") }
     var imageUri by remember {mutableStateOf<Uri?>(null)}
-
     val context = LocalContext.current
 
     val pickImageLauncher =
@@ -57,6 +65,47 @@ fun CarItemDialog(
                 imageUri = it
             }
         }
+
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) {
+            // Successfully captured the image
+            imageUri?.let { uri ->
+                context.contentResolver.notifyChange(uri, null) // Force media scanner to refresh
+                Toast.makeText(context, "Photo captured", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            // Failed to capture the image
+            imageUri = null
+            Toast.makeText(context, "Failed to capture image", Toast.LENGTH_SHORT).show()
+        }
+    }
+    //ABIIIIIIIIIIIIIII
+    //To use camera and save taken photo
+    fun createImageFile(): Uri? {
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return try {
+            val file = File.createTempFile(
+                "JPEG_${timeStamp}_",
+                ".jpg",
+                storageDir
+            )
+            FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.provider",
+                file
+            ).also{
+                uri -> imageUri = uri
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            Toast.makeText(context, "Failed to create file", Toast.LENGTH_SHORT).show()
+            null
+        }
+    }
+
+
+
 
     Column(
         modifier = Modifier
@@ -72,7 +121,7 @@ fun CarItemDialog(
         ){
             if(imageUri != null){
                 Image(
-                    painter = rememberAsyncImagePainter(imageUri),
+                    painter = rememberAsyncImagePainter(model = imageUri),
                     contentDescription = "Upload Image",
                     modifier = Modifier.fillMaxSize()
                 )
@@ -98,13 +147,18 @@ fun CarItemDialog(
                             Text("Kép feltöltése")
                         }
 
-                        Button(
-                            onClick = { /* TODO Handle photo capture */ },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = TEAGreen
-                            )) {
-                            Text("Fotózás")
-                        }
+                    Button(
+                        onClick = {
+                            createImageFile()?.let { uri ->
+                                //imageUri = uri
+                                cameraLauncher.launch(uri)
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = TEAGreen)
+                    ) {
+                        Text("Fotózás")
+                    }
+
                 }
             }
         }

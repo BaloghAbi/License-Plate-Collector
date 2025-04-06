@@ -2,7 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Storage permission -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Permissions to use camera -->
+    <!-- <uses-permission android:name="android.permission.CAMERA" /> -->
+    <!-- If application can use a camera but does not require it -->
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
 
     <application
         android:name=".teaCollectorApplication"
@@ -22,10 +30,21 @@
             android:theme="@style/Theme.TEACollector">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- ABI 03.26 -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="hu.bme.aut.android.teacollector.provider"
+
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

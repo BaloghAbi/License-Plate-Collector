@@ -1,4 +1,4 @@
-package hu.bme.aut.android.teacollector.feature.cars
+package hu.bme.aut.android.teacollector.screen.cars
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -7,25 +7,23 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFloatingActionButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import hu.bme.aut.android.teacollector.data.car.model.CarItem
-import hu.bme.aut.android.teacollector.feature.cars.components.CarItemCard
-import hu.bme.aut.android.teacollector.feature.cars.components.CarItemDialog
-import hu.bme.aut.android.teacollector.feature.cars.components.CarListBottomBar
-import hu.bme.aut.android.teacollector.feature.cars.components.CarListTopBar
+import hu.bme.aut.android.teacollector.navigation.NavigationHandler
+import hu.bme.aut.android.teacollector.screen.cars.components.CarItemCard
+import hu.bme.aut.android.teacollector.screen.cars.components.CarItemDialog
+import hu.bme.aut.android.teacollector.screen.cars.components.CarListBottomBar
+import hu.bme.aut.android.teacollector.screen.cars.components.CarListTopBar
 import hu.bme.aut.android.teacollector.navigation.Screen
 import hu.bme.aut.android.teacollector.ui.theme.TEAGreen
 
@@ -36,7 +34,7 @@ import hu.bme.aut.android.teacollector.ui.theme.TEAGreen
 fun CarListScreen(
     viewModel: CarsViewModel = viewModel(factory = CarsViewModel.Factory),
     onCarItemClick: (String) -> Unit, //pass car id to navigate
-    navController: NavHostController
+    navigationHandler: NavigationHandler
     ) {
 
     val list = viewModel.carItemList.collectAsState().value
@@ -82,12 +80,7 @@ fun CarListScreen(
             }
         },
         bottomBar = {
-            CarListBottomBar(
-                onMapClick = { navController.navigate(Screen.MainMap.route) },
-                onProfileClick = { navController.navigate(Screen.Profile.route) },
-                onHomeClick = { navController.navigate(Screen.CarList.route) },
-                onSettingsClick = { navController.navigate(Screen.Settings.route) }
-            )
+            CarListBottomBar(navigationHandler)
         }
     ) { innerPadding ->
 
@@ -116,7 +109,8 @@ fun CarListScreen(
                         viewModel.update(
                             toUpdateCar.copy(
                                 description = description,
-                                imageUri = imageUri?.toString()
+                                imageUri = imageUri?.toString(),
+                                isCollected = true
                             )
                         )
                     }

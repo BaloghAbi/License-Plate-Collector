@@ -1,4 +1,4 @@
-package hu.bme.aut.android.teacollector.feature.settings
+package hu.bme.aut.android.teacollector.screen.settings
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -7,19 +7,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.compose.ui.tooling.preview.Preview
-import hu.bme.aut.android.teacollector.feature.cars.components.CarListBottomBar
+import hu.bme.aut.android.teacollector.navigation.NavigationHandler
+import hu.bme.aut.android.teacollector.screen.cars.components.CarListBottomBar
 import hu.bme.aut.android.teacollector.navigation.Screen
 
 @Composable
-fun SettingsScreen(navController: NavHostController) {
+fun SettingsScreen(navigationHandler: NavigationHandler) {
     Scaffold(
         bottomBar = {
-            CarListBottomBar(
-                onMapClick = { navController.navigate(Screen.MainMap.route) },
-                onProfileClick = { navController.navigate(Screen.Profile.route) },
-                onHomeClick = { navController.navigate(Screen.CarList.route) },
-                onSettingsClick = { navController.navigate(Screen.Settings.route) }
-            )
+            CarListBottomBar(navigationHandler)
         }
     ) { innerPadding ->
         Text(

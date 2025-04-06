@@ -1,4 +1,4 @@
-package hu.bme.aut.android.teacollector.feature.cars
+package hu.bme.aut.android.teacollector.screen.cars
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -7,12 +7,9 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import hu.bme.aut.android.teacollector.teaCollectorApplication
 import hu.bme.aut.android.teacollector.data.car.ICarRepository
-import hu.bme.aut.android.teacollector.data.car.MemoryCarRepository
 import hu.bme.aut.android.teacollector.data.car.model.CarItem
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 
@@ -49,10 +46,11 @@ class CarsViewModel(
         viewModelScope.launch {
             try {
                 repository.update(carItem)
-                // Trigger recomposition
+                /* Trigger recomposition
                 _list.value = _list.value.map {
                     if (it.name == carItem.name) carItem else it
-                }
+                }*/
+                getAllItems()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
