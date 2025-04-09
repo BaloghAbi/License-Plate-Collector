@@ -8,4 +8,6 @@ sealed class Screen(val route: String) {
     object MainMap: Screen("carMapScreen")
     object Profile: Screen("profile")
     object Settings: Screen("settings")
+
+    object Login: Screen("login")
 }

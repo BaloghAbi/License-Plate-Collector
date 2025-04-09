@@ -44,6 +44,9 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.UUID
+import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun CarItemDialog(
@@ -54,7 +57,9 @@ fun CarItemDialog(
     var description by remember { mutableStateOf("") }
     var imageUri by remember {mutableStateOf<Uri?>(null)}
     val context = LocalContext.current
+    var tempImageUri by remember { mutableStateOf<Uri?>(null) }
 
+    //var isUploading by remember { mutableStateOf(false) }
     val pickImageLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()){ uri ->
             uri?.let {
@@ -69,7 +74,8 @@ fun CarItemDialog(
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success) {
             // Successfully captured the image
-            imageUri?.let { uri ->
+            tempImageUri?.let { uri ->
+                imageUri = uri //only if taking photo was actually successfull
                 context.contentResolver.notifyChange(uri, null) // Force media scanner to refresh
                 Toast.makeText(context, "Photo captured", Toast.LENGTH_SHORT).show()
             }
@@ -94,12 +100,22 @@ fun CarItemDialog(
                 context,
                 "${context.packageName}.provider",
                 file
-            ).also{
-                uri -> imageUri = uri
-            }
+            )
         } catch (e: IOException) {
             e.printStackTrace()
             Toast.makeText(context, "Failed to create file", Toast.LENGTH_SHORT).show()
+            null
+        }
+    }
+
+    suspend fun uploadImageToFirebase(uri: Uri): String? {
+        return try {
+            val fileName = "images/${UUID.randomUUID()}.jpg"
+            val ref = FirebaseStorage.getInstance().reference.child(fileName)
+            ref.putFile(uri).await()
+            ref.downloadUrl.await().toString()
+        } catch (e: Exception) {
+            e.printStackTrace()
             null
         }
     }
@@ -150,7 +166,7 @@ fun CarItemDialog(
                     Button(
                         onClick = {
                             createImageFile()?.let { uri ->
-                                //imageUri = uri
+                                tempImageUri = uri //store uri temporarily
                                 cameraLauncher.launch(uri)
                             }
                         },
@@ -205,6 +221,20 @@ fun CarItemDialog(
             Button(onClick = { onSave(name, description, imageUri) }) {
                 Text("Mentés") // Save Button
             }
+            /*
+            * Button(
+                onClick = {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        isUploading = true
+                        val uploadedUrl = imageUri?.let { uploadImageToFirebase(it) }
+                        isUploading = false
+                        onSave(name, description, uploadedUrl)
+                    }
+                },
+                enabled = !isUploading
+            ) {
+                Text(if (isUploading) "Mentés..." else "Mentés")
+            }*/
         }
     }
 }

@@ -29,11 +29,9 @@ import androidx.navigation.NavHostController
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CarListTopBar(
-    onMenuClick: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
     cars: List<CarItem>,
     onSearchResults: (List<CarItem>) -> Unit,
-    //navController: NavHostController
 ){
     var searchQuery by remember {mutableStateOf("")}
     var dropdownExpanded by remember { mutableStateOf(false) };
@@ -82,7 +80,7 @@ fun CarListTopBar(
                         text = { Text("Collected")},
                         onClick = {
                             dropdownExpanded = false
-                            val notCollectedCars = cars.filter { it.isCollected }
+                            val notCollectedCars = cars.filter { it.collected }
                             onSearchResults(notCollectedCars)
                         }
                     )
@@ -90,7 +88,7 @@ fun CarListTopBar(
                         text = { Text("To collect")},
                         onClick = {
                             dropdownExpanded = false
-                            val CollectedCars = cars.filter { !it.isCollected }
+                            val CollectedCars = cars.filter { !it.collected }
                             onSearchResults(CollectedCars)
                         }
                     )
@@ -101,19 +99,9 @@ fun CarListTopBar(
                             onSearchResults(cars) // Show all cars
                         }
                     )
-                    /*DropdownMenuItem(
-                        text = { Text("All")},
-                        onClick = { navController.navigate(Screen.CarList.route)}
-                    )*/
                 }
             }
 
         }
     )
 }
-
-/*@Preview
-@Composable
-fun PreviewCarListTopBar() {
-    CarListTopBar(onMenuClick = {}, onSearchQueryChange = {})
-}*/

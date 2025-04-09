@@ -9,6 +9,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,11 +38,16 @@ fun CarListScreen(
     navigationHandler: NavigationHandler
     ) {
 
-    val list = viewModel.carItemList.collectAsState().value
+    /*val list = viewModel.carItemList.collectAsState().value
+    var filteredCars by remember { mutableStateOf(list) }*/
 
-
-
+    //added to load updated screen
+    val list by viewModel.carItemList.collectAsState()
     var filteredCars by remember { mutableStateOf(list) }
+    LaunchedEffect(list) {
+        filteredCars = list
+    }
+
 
     var isDialogOpen by remember { mutableStateOf(false) }
     var carToEdit by remember {mutableStateOf<CarItem?>(null)}
@@ -53,7 +59,6 @@ fun CarListScreen(
     Scaffold(
         topBar = {
             CarListTopBar(
-                onMenuClick = {/* TODO */ },
                 onSearchQueryChange = { query ->
                     filteredCars = list.filter{
                         it.name.contains(query, ignoreCase = true)
@@ -103,14 +108,13 @@ fun CarListScreen(
             CarItemDialog(
                 onDismiss = { isDialogOpen = false },
                 onSave = { name, description, imageUri ->
-                    // TODO: Handle the saved data (e.g., add to list)
                     val toUpdateCar = list.find { it.name == name }
                     if(toUpdateCar != null){
                         viewModel.update(
                             toUpdateCar.copy(
                                 description = description,
                                 imageUri = imageUri?.toString(),
-                                isCollected = true
+                                collected = true
                             )
                         )
                     }

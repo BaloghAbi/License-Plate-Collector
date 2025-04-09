@@ -24,7 +24,8 @@ class FirebaseCarItemRepository : ICarRepository {
     }
 
     private suspend fun fillDatabase() {
-        for (i in 0 until 1000) {
+        //originally the ceil value must be 1000
+        for (i in 0 until 10) {
             val carName = "TEA-${i.toString().padStart(3, '0')}"
             val carDocRef = carsCollection.document(carName)
 
@@ -35,7 +36,7 @@ class FirebaseCarItemRepository : ICarRepository {
                     val carItem = mapOf(
                         "name" to carName,
                         "description" to "",
-                        "isCollected" to false,
+                        "collected" to false,
                         "lat" to 0.0,
                         "long" to 0.0
                     )
@@ -56,8 +57,8 @@ class FirebaseCarItemRepository : ICarRepository {
             }
             if (snapshot != null) {
                 val cars = snapshot.documents.mapNotNull { doc ->
-                    val car = doc.toObject<FirebaseCarItem>()?.asCarItem()
-                    println("Loaded Car: ${car?.name}, Collected: ${car?.isCollected}")
+                    val car = doc.toObject<CarItem>()
+                    println("Loaded Car: ${car?.name}, Collected: ${car?.collected}")
                     car
                 }
                 trySend(cars).isSuccess
@@ -68,16 +69,78 @@ class FirebaseCarItemRepository : ICarRepository {
 
 
     override suspend fun insert(carItem: CarItem) {
-        val firebaseCar = carItem.asFirebaseCarItem()
-        carsCollection.document(firebaseCar.name).set(firebaseCar).await()
+        carsCollection.document(carItem.name).set(carItem).await()
     }
 
+    //solved the problem of serialization (isConnected was stores as "collected")
     override suspend fun update(carItem: CarItem) {
-        val firebaseCar = carItem.asFirebaseCarItem()
-        carsCollection.document(firebaseCar.name).set(firebaseCar).await()
+        carsCollection.document(carItem.name).set(carItem).await()
     }
 
     override suspend fun delete(carItem: CarItem) {
         carsCollection.document(carItem.name).delete().await()
     }
 }
+
+/*something like that when auth service added
+class FirebaseCarItemRepository(
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
+    private val authService: AuthService = AuthService()
+) : ICarRepository {
+
+    private fun currentUserCarCollection(): CollectionReference {
+        val uid = authService.currentUserId
+            ?: throw IllegalStateException("User must be authenticated")
+        return firestore.collection("users").document(uid).collection("cars")
+    }
+
+    override fun getAllItems(): Flow<List<CarItem>> = callbackFlow {
+        val listener = currentUserCarCollection().addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                close(error)
+                return@addSnapshotListener
+            }
+            if (snapshot != null) {
+                val cars = snapshot.documents.mapNotNull { it.toObject<CarItem>() }
+                trySend(cars).isSuccess
+            }
+        }
+        awaitClose { listener.remove() }
+    }
+
+    override suspend fun insert(carItem: CarItem) {
+        currentUserCarCollection().document(carItem.name).set(carItem).await()
+    }
+
+    override suspend fun update(carItem: CarItem) {
+        currentUserCarCollection().document(carItem.name).set(carItem).await()
+    }
+
+    override suspend fun delete(carItem: CarItem) {
+        currentUserCarCollection().document(carItem.name).delete().await()
+    }
+
+    // Optional: Seeding logic — only if needed per user
+    suspend fun fillDatabase() {
+        for (i in 0 until 10) {
+            val carName = "TEA-${i.toString().padStart(3, '0')}"
+            val carDocRef = currentUserCarCollection().document(carName)
+            try {
+                val carDoc = carDocRef.get().await()
+                if (!carDoc.exists()) {
+                    val carItem = CarItem(
+                        name = carName,
+                        description = "",
+                        collected = false,
+                        lat = 0.0,
+                        long = 0.0
+                    )
+                    carDocRef.set(carItem).await()
+                }
+            } catch (e: Exception) {
+                println("Error seeding database: ${e.message}")
+            }
+        }
+    }
+}
+*/

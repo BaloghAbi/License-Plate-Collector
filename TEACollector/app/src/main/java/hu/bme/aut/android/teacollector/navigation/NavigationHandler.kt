@@ -23,6 +23,10 @@ class NavigationHandler(private val navController: NavController) {
         navController.navigate(Screen.Settings.route)
     }
 
+    fun navigateToLogin(){
+        navController.navigate(Screen.Login.route)
+    }
+
     fun goBack() {
         navController.popBackStack()
     }

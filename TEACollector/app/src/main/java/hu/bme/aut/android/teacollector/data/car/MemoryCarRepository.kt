@@ -20,7 +20,7 @@ class MemoryCarRepository : ICarRepository {
             CarItem(
                 name = "TEA-${i.toString().padStart(3, '0')}",
                 description = "",
-                isCollected = false,
+                collected = false,
                 lat = 0.0,
                 long = 0.0
             )

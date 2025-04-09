@@ -10,6 +10,7 @@ import hu.bme.aut.android.teacollector.data.car.ICarRepository
 import hu.bme.aut.android.teacollector.data.car.model.CarItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 
@@ -46,10 +47,6 @@ class CarsViewModel(
         viewModelScope.launch {
             try {
                 repository.update(carItem)
-                /* Trigger recomposition
-                _list.value = _list.value.map {
-                    if (it.name == carItem.name) carItem else it
-                }*/
                 getAllItems()
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -80,4 +77,5 @@ class CarsViewModel(
             }
         }
     }
+
 }

@@ -4,7 +4,6 @@ import android.app.Application
 import com.google.firebase.FirebaseApp
 import hu.bme.aut.android.teacollector.data.car.MemoryCarRepository
 import hu.bme.aut.android.teacollector.data.car.ICarRepository
-import hu.bme.aut.android.teacollector.data.car.firebase.FirebaseCarItem
 import hu.bme.aut.android.teacollector.data.car.firebase.FirebaseCarItemRepository
 
 class teaCollectorApplication : Application() {

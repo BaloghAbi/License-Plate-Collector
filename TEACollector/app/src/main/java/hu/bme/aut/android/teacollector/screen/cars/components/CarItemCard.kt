@@ -30,7 +30,7 @@ fun CarItemCard(
     carItem: CarItem,
     onCardClick: (String) -> Unit //pass carName
 ) {
-    var isChecked by rememberSaveable { mutableStateOf(carItem.isCollected) }
+    var isChecked by rememberSaveable { mutableStateOf(carItem.collected) }
 
 
     Card(
@@ -45,7 +45,7 @@ fun CarItemCard(
             modifier = Modifier.padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if(carItem.imageUri != null){
+            if(!carItem.imageUri.isNullOrEmpty()){
                 AsyncImage(
                     model = carItem.imageUri.takeIf {!it.isNullOrEmpty()}, // Fallback to empty string to avoid null issues
                     contentDescription = "Car Image",
@@ -71,17 +71,3 @@ fun CarItemCard(
         }
     }
 }
-
-
-/*@Preview
-@Composable
-fun PreviewCarItemCard() {
-    CarItemCard(
-        carItem = CarItem(
-            name = "TEA-123",
-            description = "Szép rendszám",
-            long = 10.1,
-            lat = 10.2
-        )
-    )
-}*/

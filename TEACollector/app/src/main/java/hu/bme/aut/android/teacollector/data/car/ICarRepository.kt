@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface ICarRepository {
 
-    fun getAllItems(): Flow<List<CarItem>>
+    fun getAllItems(): Flow<List<CarItem>> //asynchronous monitoring
     suspend fun insert(carItem: CarItem)
     suspend fun update(carItem: CarItem)
     suspend fun delete(carItem: CarItem)
